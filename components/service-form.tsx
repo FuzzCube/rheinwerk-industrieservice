@@ -99,7 +99,7 @@ export function ServiceRequestForm() {
     setErrors((current) => { const next = { ...current }; delete next[key]; return next; });
     setFormMessage("");
   };
-  const goTo = (next: number) => { setStep(next); setErrors({}); setFormMessage(""); window.scrollTo({ top: 0, behavior: "smooth" }); };
+  const goTo = (next: number) => { setStep(next); setErrors({}); setFormMessage(""); };
   const next = () => { const found = validate(values, step); if (Object.keys(found).length) { setErrors(found); return; } goTo(Math.min(step + 1, 5)); };
   const addFiles = (selected: FileList | null) => {
     if (!selected) return;
