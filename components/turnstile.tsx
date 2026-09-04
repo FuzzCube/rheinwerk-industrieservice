@@ -16,7 +16,7 @@ export function Turnstile({ onToken }: { onToken: (token: string) => void }) {
   const siteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
   const container = useRef<HTMLDivElement>(null);
   const widget = useRef<string | null>(null);
-  const [loaded, setLoaded] = useState(false);
+  const [loaded, setLoaded] = useState(() => typeof window !== "undefined" && Boolean(window.turnstile));
 
   useEffect(() => {
     if (!siteKey || !loaded || !container.current || !window.turnstile || widget.current) return;
@@ -34,5 +34,5 @@ export function Turnstile({ onToken }: { onToken: (token: string) => void }) {
   }, [loaded, onToken, siteKey]);
 
   if (!siteKey) return <p className="turnstile-placeholder">Spam-Schutz wird beim Vercel-Deployment aktiviert.</p>;
-  return <><Script src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit" strategy="afterInteractive" onLoad={() => setLoaded(true)} /><div ref={container} className="turnstile" /></>;
+  return <><Script src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit" strategy="afterInteractive" onReady={() => setLoaded(true)} /><div ref={container} className="turnstile" /></>;
 }

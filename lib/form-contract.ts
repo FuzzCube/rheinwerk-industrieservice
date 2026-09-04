@@ -3,12 +3,10 @@ export const REQUIRED_FIELDS = [
   "contact.contact_name",
   "contact.business_email",
   "contact.phone",
-  "site_and_equipment.site_name",
   "site_and_equipment.street_and_number",
   "site_and_equipment.postal_code",
   "site_and_equipment.city",
   "site_and_equipment.equipment_type",
-  "site_and_equipment.machine_number",
   "request.service_type",
   "request.description",
   "request.urgency",
@@ -44,14 +42,14 @@ export type ServiceRequestPayload = {
     customer_number?: string;
   };
   site_and_equipment: {
-    site_name: string;
+    site_name?: string;
     street_and_number: string;
     postal_code: string;
     city: string;
     equipment_type: string;
     manufacturer?: string;
     model_or_type?: string;
-    machine_number: string;
+    machine_number?: string;
   };
   request: {
     service_type: string;
@@ -80,12 +78,10 @@ export function validatePayload(input: unknown): RequiredField[] {
   if (text(data.contact?.contact_name).length < 2) invalid.push("contact.contact_name");
   if (!/^[^@\s]+@[^@\s.]+\.[a-z]{2,}$/i.test(text(data.contact?.business_email))) invalid.push("contact.business_email");
   if (!/^[+0][\d\s()/-]{6,}$/.test(text(data.contact?.phone))) invalid.push("contact.phone");
-  if (text(data.site_and_equipment?.site_name).length < 2) invalid.push("site_and_equipment.site_name");
   if (text(data.site_and_equipment?.street_and_number).length < 4) invalid.push("site_and_equipment.street_and_number");
   if (!/^\d{5}$/.test(text(data.site_and_equipment?.postal_code))) invalid.push("site_and_equipment.postal_code");
   if (text(data.site_and_equipment?.city).length < 2) invalid.push("site_and_equipment.city");
   if (!text(data.site_and_equipment?.equipment_type)) invalid.push("site_and_equipment.equipment_type");
-  if (text(data.site_and_equipment?.machine_number).length < 3) invalid.push("site_and_equipment.machine_number");
   if (!text(data.request?.service_type)) invalid.push("request.service_type");
   if (text(data.request?.description).length < 10) invalid.push("request.description");
   if (!text(data.request?.urgency)) invalid.push("request.urgency");

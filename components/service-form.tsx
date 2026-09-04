@@ -24,7 +24,7 @@ const maxFileSize = 5 * 1024 * 1024;
 
 const fieldMap: Partial<Record<InvalidField, FormKey>> = {
   "contact.company_name": "company", "contact.contact_name": "contactName", "contact.business_email": "email", "contact.phone": "phone",
-  "site_and_equipment.site_name": "siteName", "site_and_equipment.street_and_number": "street", "site_and_equipment.postal_code": "postalCode", "site_and_equipment.city": "city", "site_and_equipment.equipment_type": "equipmentType", "site_and_equipment.machine_number": "machineNumber",
+  "site_and_equipment.street_and_number": "street", "site_and_equipment.postal_code": "postalCode", "site_and_equipment.city": "city", "site_and_equipment.equipment_type": "equipmentType",
   "request.service_type": "serviceType", "request.description": "description", "request.urgency": "urgency", "request.known_safety_hazard": "safetyHazard", "request.preferred_service_date": "desiredDate", privacy_consent: "privacyConsent",
 };
 const labels: Record<FormKey, string> = {
@@ -41,12 +41,10 @@ function validate(values: FormValues, step: number): FormErrors {
     if (!/^[+0][\d\s()/-]{6,}$/.test(text("phone"))) errors.phone = "Bitte geben Sie eine Telefonnummer mit Vorwahl an.";
   }
   if (step === 2) {
-    if (text("siteName").length < 2) errors.siteName = "Bitte geben Sie die Standortbezeichnung an.";
     if (text("street").length < 4) errors.street = "Bitte geben Sie Straße und Hausnummer an.";
     if (!/^\d{5}$/.test(text("postalCode"))) errors.postalCode = "Die PLZ besteht aus fünf Ziffern, z. B. 68169.";
     if (text("city").length < 2) errors.city = "Bitte geben Sie den Ort an.";
     if (!text("equipmentType")) errors.equipmentType = "Bitte wählen Sie die Anlage oder das Gerät.";
-    if (text("machineNumber").length < 3) errors.machineNumber = "Bitte geben Sie die Maschinennummer vom Typenschild an.";
   }
   if (step === 3) {
     if (!text("serviceType")) errors.serviceType = "Bitte wählen Sie die Art der Leistung.";
@@ -69,6 +67,7 @@ const safetyValues: Record<string, string> = { Nein: "no", Ja: "yes", Unklar: "u
 export function ServiceRequestForm() {
   const router = useRouter();
   const inputRef = useRef<HTMLInputElement>(null);
+  const feedbackRef = useRef<HTMLDivElement>(null);
   const [step, setStep] = useState(1);
   const [values, setValues] = useState<FormValues>(emptyForm);
   const [errors, setErrors] = useState<FormErrors>({});
@@ -77,6 +76,7 @@ export function ServiceRequestForm() {
   const [turnstileToken, setTurnstileToken] = useState("");
   const [sending, setSending] = useState(false);
   const [formMessage, setFormMessage] = useState("");
+  const [feedbackScrollRequest, setFeedbackScrollRequest] = useState(0);
 
   useEffect(() => {
     const frame = window.requestAnimationFrame(() => {
@@ -93,6 +93,13 @@ export function ServiceRequestForm() {
   useEffect(() => {
     if (submissionId) sessionStorage.setItem("rheinwerk-service-request", JSON.stringify(values));
   }, [submissionId, values]);
+  useEffect(() => {
+    if (!feedbackScrollRequest) return;
+    feedbackRef.current?.scrollIntoView({
+      behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth",
+      block: "center",
+    });
+  }, [feedbackScrollRequest]);
 
   const update = <K extends FormKey>(key: K, value: FormValues[K]) => {
     setValues((current) => ({ ...current, [key]: value }));
@@ -139,7 +146,7 @@ export function ServiceRequestForm() {
 
   const submit = async () => {
     const found = validate(values, 5);
-    if (Object.keys(found).length) { setErrors(found); return; }
+    if (Object.keys(found).length) { setErrors(found); setFeedbackScrollRequest((current) => current + 1); return; }
     setSending(true); setFormMessage("");
     try {
       const attachments = await uploadFiles();
@@ -147,7 +154,7 @@ export function ServiceRequestForm() {
       const payload: ServiceRequestPayload = {
         schema_version: "1.0", submission_id: id, source: "rheinwerk_website_service_request", locale: "de-DE", submitted_at: new Date().toISOString(),
         contact: { company_name: values.company.trim(), contact_name: values.contactName.trim(), business_email: values.email.trim(), phone: values.phone.trim(), customer_number: values.customerNumber.trim() || undefined },
-        site_and_equipment: { site_name: values.siteName.trim(), street_and_number: values.street.trim(), postal_code: values.postalCode.trim(), city: values.city.trim(), equipment_type: equipmentValues[values.equipmentType], manufacturer: values.manufacturer.trim() || undefined, model_or_type: values.model.trim() || undefined, machine_number: values.machineNumber.trim() },
+        site_and_equipment: { site_name: values.siteName.trim() || undefined, street_and_number: values.street.trim(), postal_code: values.postalCode.trim(), city: values.city.trim(), equipment_type: equipmentValues[values.equipmentType], manufacturer: values.manufacturer.trim() || undefined, model_or_type: values.model.trim() || undefined, machine_number: values.machineNumber.trim() || undefined },
         request: { service_type: serviceValues[values.serviceType], preferred_service_date: values.desiredDate, description: values.description.trim(), urgency: urgencyValues[values.urgency], known_safety_hazard: safetyValues[values.safetyHazard], requires_human_review: isCritical(values) },
         contract_and_attachments: { customer_or_sla_contract_number: values.slaNumber.trim() || undefined, emergency_sla_24_7: values.sla247 === "Ja", attachments },
         privacy_consent: values.privacyConsent, turnstile_token: turnstileToken || undefined,
@@ -174,13 +181,16 @@ export function ServiceRequestForm() {
         if (first) setStep(stepForField(first));
         else if (attachmentError) setStep(4);
         setFormMessage(attachmentError ? "Bitte prüfen Sie Dateityp, Dateigröße und Anzahl der Anhänge." : "Bitte korrigieren Sie die aufgeführten Angaben.");
+        setFeedbackScrollRequest((current) => current + 1);
         return;
       }
       if (response.status === 400) setFormMessage("Bitte prüfen Sie Ihre Angaben und die Zustimmung zur Datenverarbeitung.");
       else if (response.status === 429) setFormMessage("Zu viele Versuche. Bitte warten Sie einige Minuten und versuchen Sie es erneut.");
       else setFormMessage(result.message || "Die Serviceanfrage konnte nicht gesendet werden. Bitte versuchen Sie es erneut.");
+      setFeedbackScrollRequest((current) => current + 1);
     } catch (error) {
       setFormMessage(error instanceof Error ? error.message : "Die Serviceanfrage konnte nicht gesendet werden.");
+      setFeedbackScrollRequest((current) => current + 1);
     } finally { setSending(false); }
   };
 
@@ -193,8 +203,7 @@ export function ServiceRequestForm() {
     <div className="urgent-strip"><Alert lead="Kritische Fälle.">Bei Produktionsstillstand oder Sicherheitsgefahr melden Sie den Fall zusätzlich telefonisch unter <a href="tel:+4962100000">+49 621 00000-0</a>.</Alert></div>
     <form className="multi-form" onSubmit={(event) => { event.preventDefault(); void submit(); }} noValidate>
       <ol className="form-steps" aria-label="Formularschritte">{steps.map((label, index) => <li key={label} className={step === index + 1 ? "active" : step > index + 1 ? "done" : ""}><button type="button" onClick={() => index + 1 < step && goTo(index + 1)} disabled={index + 1 > step}><span>{index + 1}</span>{label}</button></li>)}</ol>
-      {errorList.length > 0 && <div className="error-summary" role="alert"><h2>Bitte korrigieren Sie folgende Angaben:</h2><ul>{errorList.map(([key, message]) => <li key={key}><button type="button" onClick={() => document.getElementById(`f-${key}`)?.focus()}>{message}</button></li>)}</ul></div>}
-      {formMessage && <Alert tone="danger">{formMessage}</Alert>}
+      {(errorList.length > 0 || formMessage) && <div ref={feedbackRef}>{errorList.length > 0 && <div className="error-summary" role="alert"><h2>Bitte korrigieren Sie folgende Angaben:</h2><ul>{errorList.map(([key, message]) => <li key={key}><button type="button" onClick={() => document.getElementById(`f-${key}`)?.focus()}>{message}</button></li>)}</ul></div>}{formMessage && <Alert tone="danger">{formMessage}</Alert>}</div>}
       <div className="form-body">
         {step === 1 && <StepOne values={values} errors={errors} update={update} />}
         {step === 2 && <StepTwo values={values} errors={errors} update={update} />}
@@ -203,7 +212,7 @@ export function ServiceRequestForm() {
         {step === 5 && <StepFive values={values} errors={errors} update={update} files={files} edit={goTo} onTurnstile={onTurnstile} />}
         {step >= 3 && isCritical(values) && <Alert tone="danger" lead="Menschliche Prüfung erforderlich.">Dieser Fall wird als kritisch behandelt und muss durch einen Menschen geprüft werden. Bitte melden Sie ihn zusätzlich telefonisch unter +49 621 00000-0.</Alert>}
       </div>
-      <div className="form-actions">{step > 1 && <button className="button button--secondary" type="button" onClick={() => goTo(step - 1)}><Icon name="arrow-left" size={18} />Zurück</button>}<div />{step < 5 ? <button className="button button--primary" type="button" onClick={next}>Weiter<Icon name="arrow-right" size={18} /></button> : <button className="button button--primary" type="submit" disabled={sending}>{sending ? "Wird gesendet" : "Anfrage senden"}<Icon name="arrow-right" size={18} /></button>}</div>
+      <div className="form-actions">{step > 1 && <button className="button button--secondary" type="button" onClick={() => goTo(step - 1)}><Icon name="arrow-left" size={18} />Zurück</button>}<div />{step < 5 ? <button className="button button--primary" type="button" onClick={(event) => { event.preventDefault(); next(); }}>Weiter<Icon name="arrow-right" size={18} /></button> : <button className="button button--primary" type="submit" disabled={sending}>{sending ? "Wird gesendet" : "Anfrage senden"}<Icon name="arrow-right" size={18} /></button>}</div>
     </form>
   </div></Container></Section>;
 }
@@ -214,7 +223,7 @@ function Field({ name, label, value, error, update, type = "text", optional = fa
 function TextAreaField({ values, errors, update }: StepProps) { return <label className="field" htmlFor="f-description"><span>Beschreibung der Aufgabe oder Störung<small>Pflichtangabe</small></span><textarea id="f-description" value={values.description} onChange={(event) => update("description", event.target.value)} aria-invalid={!!errors.description} /><em>Beschreiben Sie, was Sie beobachten, Geräusch, Leckage, Messwert oder Meldung.</em>{errors.description && <strong>{errors.description}</strong>}</label>; }
 function RadioCards({ name, legend, options, value, error, update, optional = false }: { name: FormKey; legend: string; options: string[]; value: string; error?: string; update: StepProps["update"]; optional?: boolean }) { return <fieldset className="radio-field" id={`f-${name}`} tabIndex={-1}><legend>{legend}<small>{optional ? "Optional" : "Pflichtangabe"}</small></legend><div>{options.map((option) => <label key={option} className={value === option ? "selected" : ""}><input type="radio" name={name} value={option} checked={value === option} onChange={() => update(name, option)} /><span>{option}</span></label>)}</div>{error && <strong>{error}</strong>}</fieldset>; }
 function StepOne({ values, errors, update }: StepProps) { return <div className="form-grid"><Field name="company" label="Unternehmen" value={values.company} error={errors.company} update={update} placeholder="z. B. Rhein-Neckar Logistik GmbH" /><Field name="contactName" label="Vor- und Nachname der Kontaktperson" value={values.contactName} error={errors.contactName} update={update} /><Field name="email" label="Geschäftliche E-Mail-Adresse" value={values.email} error={errors.email} update={update} type="email" placeholder="name@firma.de" /><Field name="phone" label="Telefonnummer" value={values.phone} error={errors.phone} update={update} type="tel" placeholder="+49 621 000000" /><Field name="customerNumber" label="Kundennummer" value={values.customerNumber} update={update} optional helper="Falls bekannt. Beschleunigt die Zuordnung." /></div>; }
-function StepTwo({ values, errors, update }: StepProps) { return <div className="form-stack"><div className="form-grid"><Field name="siteName" label="Standortbezeichnung" value={values.siteName} error={errors.siteName} update={update} placeholder="z. B. Werk Süd, Halle 3" /><Field name="street" label="Straße und Hausnummer" value={values.street} error={errors.street} update={update} /><Field name="postalCode" label="PLZ" value={values.postalCode} error={errors.postalCode} update={update} /><Field name="city" label="Ort" value={values.city} error={errors.city} update={update} /></div><RadioCards name="equipmentType" legend="Anlage oder Gerät" options={["Pumpe", "Kompressor", "Lüftungsanlage", "Sonstiges"]} value={values.equipmentType} error={errors.equipmentType} update={update} /><div className="form-grid"><Field name="manufacturer" label="Hersteller" value={values.manufacturer} update={update} optional /><Field name="model" label="Modell oder Typ" value={values.model} update={update} optional /><Field name="machineNumber" label="Maschinennummer" value={values.machineNumber} error={errors.machineNumber} update={update} helper="Vom Typenschild, z. B. P-114-2019." /></div></div>; }
+function StepTwo({ values, errors, update }: StepProps) { return <div className="form-stack"><div className="form-grid"><Field name="siteName" label="Standortbezeichnung" value={values.siteName} update={update} optional placeholder="z. B. Werk Süd, Halle 3" /><Field name="street" label="Straße und Hausnummer" value={values.street} error={errors.street} update={update} /><Field name="postalCode" label="PLZ" value={values.postalCode} error={errors.postalCode} update={update} /><Field name="city" label="Ort" value={values.city} error={errors.city} update={update} /></div><RadioCards name="equipmentType" legend="Anlage oder Gerät" options={["Pumpe", "Kompressor", "Lüftungsanlage", "Sonstiges"]} value={values.equipmentType} error={errors.equipmentType} update={update} /><div className="form-grid"><Field name="manufacturer" label="Hersteller" value={values.manufacturer} update={update} optional /><Field name="model" label="Modell oder Typ" value={values.model} update={update} optional /><Field name="machineNumber" label="Maschinennummer" value={values.machineNumber} update={update} optional helper="Vom Typenschild, z. B. P-114-2019." /></div></div>; }
 function StepThree({ values, errors, update }: StepProps) { return <div className="form-stack"><div className="form-grid"><label className="field" htmlFor="f-serviceType"><span>Art der Leistung<small>Pflichtangabe</small></span><select id="f-serviceType" value={values.serviceType} onChange={(event) => update("serviceType", event.target.value)} aria-invalid={!!errors.serviceType}><option value="">Bitte wählen</option>{["Inspektion", "Planmäßige Wartung", "Diagnose und Reparatur"].map((option) => <option key={option}>{option}</option>)}</select>{errors.serviceType && <strong>{errors.serviceType}</strong>}</label><Field name="desiredDate" label="Gewünschter Einsatztermin" value={values.desiredDate} error={errors.desiredDate} update={update} type="date" helper="Wunschtermin, keine Zusage." /></div><TextAreaField values={values} errors={errors} update={update} /><RadioCards name="urgency" legend="Dringlichkeit" options={["Planbar", "Zeitnah", "Erheblich", "Produktionsstillstand"]} value={values.urgency} error={errors.urgency} update={update} /><RadioCards name="safetyHazard" legend="Bekannte Sicherheitsgefahr" options={["Nein", "Ja", "Unklar"]} value={values.safetyHazard} error={errors.safetyHazard} update={update} /></div>; }
 function StepFour({ values, update, files, setFiles, addFiles, inputRef }: StepProps & { files: FileItem[]; setFiles: React.Dispatch<React.SetStateAction<FileItem[]>>; addFiles: (files: FileList | null) => void; inputRef: React.RefObject<HTMLInputElement | null> }) { return <div className="form-stack"><div className="form-grid"><Field name="slaNumber" label="Kunden- oder SLA-Vertragsnummer" value={values.slaNumber} update={update} optional helper="Falls vorhanden. Vereinbarte Konditionen haben Vorrang." /></div><RadioCards name="sla247" legend="Besteht ein vereinbartes 24/7-Notfall-SLA?" options={["Nein", "Ja"]} value={values.sla247} update={update} optional /><div className="upload-zone"><input ref={inputRef} type="file" accept=".pdf,.jpg,.jpeg,.png" multiple onChange={(event) => addFiles(event.target.files)} /><button type="button" onClick={() => inputRef.current?.click()} disabled={files.length >= 3}><Icon name="upload" size={22} />Dateien auswählen</button><p>PDF, JPG oder PNG · maximal 3 Dateien · je höchstens 5 MB</p>{files.length > 0 && <ul>{files.map((item) => <li key={item.id}><div><strong>{item.file.name}</strong><span>{(item.file.size / 1024 / 1024).toFixed(1)} MB · {item.status === "ready" ? "Bereit" : item.status === "uploading" ? `${Math.round(item.progress)} %` : item.status === "done" ? "Übertragen" : item.error}</span></div><button type="button" onClick={() => setFiles((current) => current.filter((file) => file.id !== item.id))} aria-label={`${item.file.name} entfernen`}><Icon name="x" size={18} /></button></li>)}</ul>}</div></div>; }
 function StepFive({ values, errors, update, files, edit, onTurnstile }: StepProps & { files: FileItem[]; edit: (step: number) => void; onTurnstile: (token: string) => void }) { const groups = [{ name: "Kontakt", step: 1, rows: [["Unternehmen", values.company], ["Kontaktperson", values.contactName], ["E-Mail", values.email], ["Telefon", values.phone], ["Kundennummer", values.customerNumber]] }, { name: "Standort und Anlage", step: 2, rows: [["Standort", values.siteName], ["Adresse", [values.street, values.postalCode, values.city].filter(Boolean).join(", ")], ["Anlage", values.equipmentType], ["Hersteller / Modell", [values.manufacturer, values.model].filter(Boolean).join(" · ")], ["Maschinennummer", values.machineNumber]] }, { name: "Anfrage", step: 3, rows: [["Leistung", values.serviceType], ["Beschreibung", values.description], ["Dringlichkeit", values.urgency], ["Sicherheitsgefahr", values.safetyHazard], ["Wunschtermin", values.desiredDate]] }, { name: "Vertrag und Anhänge", step: 4, rows: [["SLA-Nummer", values.slaNumber], ["24/7-Notfall-SLA", values.sla247], ["Dateien", String(files.length)]] }]; return <div className="form-stack"><div className="review-groups">{groups.map((group) => <Panel key={group.name}><div className="review-heading"><h3>{group.name}</h3><button type="button" onClick={() => edit(group.step)}>Ändern</button></div><dl>{group.rows.map(([label, value]) => <div key={label}><dt>{label}</dt><dd>{value || "–"}</dd></div>)}</dl></Panel>)}</div><label className="consent" htmlFor="f-privacyConsent"><input id="f-privacyConsent" type="checkbox" checked={values.privacyConsent} onChange={(event) => update("privacyConsent", event.target.checked)} /><span>Ich stimme der Verarbeitung der angegebenen personenbezogenen Daten zur Bearbeitung dieser Serviceanfrage zu und darf die übermittelten Dateien dafür verwenden.</span></label>{errors.privacyConsent && <strong className="field-error">{errors.privacyConsent}</strong>}<Turnstile onToken={onTurnstile} /><Alert>Priorität, Termin und kommerzielle Bedingungen werden erst nach Prüfung durch den Service Desk bestätigt. Mit dem Senden entsteht kein Auftrag.</Alert></div>; }
