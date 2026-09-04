@@ -73,7 +73,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ status: "invalid", message: "Required fields are missing or privacy consent was not given.", invalid_fields: invalidFields }, { status: 400 });
   }
   if (!await verifyTurnstile(payload.turnstile_token, ip)) {
-    return NextResponse.json({ status: "invalid", message: "Spam protection could not be verified." }, { status: 400 });
+    return NextResponse.json({ status: "turnstile_failed", message: "Die Sicherheitsprüfung ist abgelaufen oder fehlgeschlagen." }, { status: 400 });
   }
   const webhookUrl = process.env.MAKE_WEBHOOK_URL;
   if (!webhookUrl) return NextResponse.json({ status: "not_configured", message: "The Make webhook is not configured." }, { status: 503 });
@@ -99,11 +99,14 @@ export async function POST(request: Request) {
     const responseText = await makeResponse.text();
     let responseBody: unknown;
     try { responseBody = responseText ? JSON.parse(responseText) : {}; } catch { responseBody = { status: "upstream_error", message: responseText || "Unexpected response from Make." }; }
+    if (makeResponse.status >= 500) {
+      return NextResponse.json({ status: "upstream_error", message: "Die Serviceanfrage konnte im Verarbeitungssystem nicht abgeschlossen werden." }, { status: 502 });
+    }
     if (makeResponse.status === 201 && responseBody && typeof responseBody === "object") {
       responseBody = { ...responseBody, human_review: humanReview || (responseBody as { human_review?: boolean }).human_review === true };
     }
     return NextResponse.json(responseBody, { status: makeResponse.status });
   } catch {
-    return NextResponse.json({ status: "upstream_error", message: "The service request could not be submitted." }, { status: 502 });
+    return NextResponse.json({ status: "upstream_error", message: "Die Serviceanfrage konnte nicht gesendet werden." }, { status: 502 });
   }
 }
