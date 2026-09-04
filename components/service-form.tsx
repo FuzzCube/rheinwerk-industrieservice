@@ -106,8 +106,15 @@ export function ServiceRequestForm() {
     setErrors((current) => { const next = { ...current }; delete next[key]; return next; });
     setFormMessage("");
   };
-  const goTo = (next: number) => { setStep(next); setErrors({}); setFormMessage(""); };
-  const next = () => { const found = validate(values, step); if (Object.keys(found).length) { setErrors(found); return; } goTo(Math.min(step + 1, 5)); };
+  const goTo = (next: number) => { setStep(next); };
+  const next = () => {
+    const found = validate(values, step);
+    if (Object.keys(found).length) {
+      setErrors((current) => ({ ...current, ...found }));
+      return;
+    }
+    goTo(Math.min(step + 1, 5));
+  };
   const addFiles = (selected: FileList | null) => {
     if (!selected) return;
     const available = Math.max(0, 3 - files.length);
@@ -154,7 +161,7 @@ export function ServiceRequestForm() {
       const payload: ServiceRequestPayload = {
         schema_version: "1.0", submission_id: id, source: "rheinwerk_website_service_request", locale: "de-DE", submitted_at: new Date().toISOString(),
         contact: { company_name: values.company.trim(), contact_name: values.contactName.trim(), business_email: values.email.trim(), phone: values.phone.trim(), customer_number: values.customerNumber.trim() || undefined },
-        site_and_equipment: { site_name: values.siteName.trim() || undefined, street_and_number: values.street.trim(), postal_code: values.postalCode.trim(), city: values.city.trim(), equipment_type: equipmentValues[values.equipmentType], manufacturer: values.manufacturer.trim() || undefined, model_or_type: values.model.trim() || undefined, machine_number: values.machineNumber.trim() || undefined },
+        site_and_equipment: { site_name: values.siteName.trim(), street_and_number: values.street.trim(), postal_code: values.postalCode.trim(), city: values.city.trim(), equipment_type: equipmentValues[values.equipmentType], manufacturer: values.manufacturer.trim() || undefined, model_or_type: values.model.trim() || undefined, machine_number: values.machineNumber.trim() },
         request: { service_type: serviceValues[values.serviceType], preferred_service_date: values.desiredDate, description: values.description.trim(), urgency: urgencyValues[values.urgency], known_safety_hazard: safetyValues[values.safetyHazard], requires_human_review: isCritical(values) },
         contract_and_attachments: { customer_or_sla_contract_number: values.slaNumber.trim() || undefined, emergency_sla_24_7: values.sla247 === "Ja", attachments },
         privacy_consent: values.privacyConsent, turnstile_token: turnstileToken || undefined,
