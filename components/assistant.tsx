@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Bot, Send, X } from "lucide-react";
+import { Bot, LoaderCircle, Send, X } from "lucide-react";
 
 const WEBHOOK_URL =
   "https://rheinwerk-rag.130-61-221-231.sslip.io/webhook/rheinwerk-assistant";
@@ -113,7 +113,18 @@ export function Assistant() {
           <>
             <p className="assistant-question">{question}</p>
 
-            {loading ? <p>Antwort wird erstellt...</p> : <p>{answer}</p>}
+            {loading ? (
+              <div className="assistant-loading">
+                <LoaderCircle
+                  className="assistant-spinner"
+                  size={20}
+                  aria-hidden="true"
+                />
+                <span>Antwort wird erstellt...</span>
+              </div>
+            ) : (
+              <p>{answer}</p>
+            )}
 
             {!loading && (
               <button
@@ -147,10 +158,19 @@ export function Assistant() {
 
         <button
           type="submit"
-          aria-label="Frage senden"
+          aria-label={loading ? "Antwort wird erstellt" : "Frage senden"}
+          aria-busy={loading}
           disabled={loading || !question.trim()}
         >
-          <Send size={18} />
+          {loading ? (
+            <LoaderCircle
+              className="assistant-spinner"
+              size={20}
+              aria-hidden="true"
+            />
+          ) : (
+            <Send size={18} />
+          )}
         </button>
       </form>
     </aside>
