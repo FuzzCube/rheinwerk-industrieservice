@@ -24,7 +24,7 @@ export function Assistant() {
 
     if (!trimmedQuestion || loading) return;
 
-    setQuestion(trimmedQuestion);
+    setQuestion("");
     setAnswer("");
     setLoading(true);
 
@@ -111,8 +111,6 @@ export function Assistant() {
           </>
         ) : (
           <>
-            <p className="assistant-question">{question}</p>
-
             {loading ? (
               <div className="assistant-loading">
                 <LoaderCircle

@@ -2482,7 +2482,14 @@ function AssistantPanel({
     }
   }), /*#__PURE__*/React.createElement("button", {
     type: "button",
-    onClick: onSend,
+    onClick: event => {
+      try {
+        return onSend && onSend(event);
+      } finally {
+        const input = event.currentTarget.parentElement && event.currentTarget.parentElement.querySelector("input");
+        if (input) input.value = "";
+      }
+    },
     "aria-label": "Frage senden",
     style: {
       width: 44,
