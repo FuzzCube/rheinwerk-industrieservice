@@ -1,18 +1,18 @@
 # RheinWerk Industrieservice
 
-Полная версия исходного сайта на Next.js 16, App Router, TypeScript и Tailwind CSS. Исходные HTML-файлы сохранены в корне проекта как референс; CSS-токены из исходной дизайн-системы используются приложением напрямую.
+Vollständige Version der ursprünglichen Website auf Basis von Next.js 16, App Router, TypeScript und Tailwind CSS. Die ursprünglichen HTML-Dateien liegen im Projektstamm als Referenz vor; die CSS-Tokens des ursprünglichen Designsystems werden direkt von der Anwendung verwendet.
 
-## Что реализовано
+## Implementiert
 
-- Все страницы, навигация, мобильное меню, адаптивные состояния и информационный ассистент.
-- Пятишаговая немецкая форма с сохранением черновика в `sessionStorage`.
-- Проверка обязательных полей на клиенте и сервере с перечнем полей, которые надо исправить.
-- Детерминированный `human_review: true` для Produktionsstillstand, а также для Sicherheitsgefahr `Ja` или `Unklar`.
-- Ответы Make `201`, `400` и `409`; повторная заявка показывается как уже успешно переданная.
-- До трех приватных PDF/JPG/PNG-файлов по 5 MB через Vercel Blob.
-- Cloudflare Turnstile, базовое ограничение частоты заявок и загрузок, серверный прокси к Make.
+- Sämtliche Seiten, die Navigation, das mobile Menü, responsive Zustände und der Informationsassistent.
+- Ein fünfstufiges deutsches Formular mit Speicherung des Entwurfs in `sessionStorage`.
+- Prüfung der Pflichtfelder auf Client- und Serverseite mit einer Liste der zu korrigierenden Felder.
+- Deterministisches `human_review: true` bei Produktionsstillstand sowie bei Sicherheitsgefahr `Ja` oder `Unklar`.
+- Make-Antworten `201`, `400` und `409`; ein erneutes Absenden wird als bereits erfolgreich übermittelt angezeigt.
+- Bis zu drei private PDF-, JPG- oder PNG-Dateien mit jeweils maximal 5 MB über Vercel Blob.
+- Cloudflare Turnstile, grundlegende Ratenbegrenzung für Anfragen und Uploads sowie ein Server-Proxy zu Make.
 
-## Локальный запуск
+## Lokaler Start
 
 ```bash
 npm install
@@ -20,7 +20,7 @@ cp .env.example .env.local
 npm run dev
 ```
 
-Проверки:
+Prüfungen:
 
 ```bash
 npm run lint
@@ -28,25 +28,25 @@ npm run typecheck
 npm run build
 ```
 
-Production-сборка использует Webpack, потому что в изолированных средах Turbopack может пытаться открыть внутренний служебный порт.
+Der Production-Build verwendet Webpack, da Turbopack in isolierten Umgebungen versuchen kann, einen internen Dienstport zu öffnen.
 
-## Переменные окружения
+## Umgebungsvariablen
 
-Скопируйте значения из [.env.example](./.env.example):
+Übernehmen Sie die Werte aus [.env.example](./.env.example):
 
-- `MAKE_WEBHOOK_URL`: URL Custom Webhook из Make.
-- `MAKE_API_KEY`: необязательно; отправляется Make в заголовке `x-make-apikey`.
-- `BLOB_READ_WRITE_TOKEN`: создается при подключении Vercel Blob к проекту.
-- `NEXT_PUBLIC_TURNSTILE_SITE_KEY`: публичный ключ Cloudflare Turnstile.
-- `TURNSTILE_SECRET_KEY`: секретный ключ Cloudflare Turnstile.
+- `MAKE_WEBHOOK_URL`: URL des Custom Webhooks in Make.
+- `MAKE_API_KEY`: optional; wird von Make im Header `x-make-apikey` erwartet.
+- `BLOB_READ_WRITE_TOKEN`: wird beim Verbinden von Vercel Blob mit dem Projekt erstellt.
+- `NEXT_PUBLIC_TURNSTILE_SITE_KEY`: öffentlicher Cloudflare-Turnstile-Schlüssel.
+- `TURNSTILE_SECRET_KEY`: geheimer Cloudflare-Turnstile-Schlüssel.
 
-Эти же переменные надо добавить в Vercel в `Project Settings > Environment Variables`. Секреты не должны начинаться с `NEXT_PUBLIC_`.
+Dieselben Variablen müssen in Vercel unter `Project Settings > Environment Variables` hinterlegt werden. Geheimnisse dürfen nicht mit `NEXT_PUBLIC_` beginnen.
 
-## Контракт с Make
+## Vertrag mit Make
 
-Браузер отправляет JSON только на `/api/service-request`. Сервер проверяет форму и Turnstile, создает временные ссылки для приватных файлов, удаляет Turnstile-токен и пересылает запрос в Make.
+Der Browser sendet JSON ausschließlich an `/api/service-request`. Der Server prüft das Formular und Turnstile, erstellt temporäre Links für private Dateien, entfernt das Turnstile-Token und leitet die Anfrage an Make weiter.
 
-Основные поля запроса:
+Wichtige Anfragefelder:
 
 ```json
 {
@@ -70,7 +70,7 @@ Production-сборка использует Webpack, потому что в и�
         "mime_type": "image/jpeg",
         "size_bytes": 123456,
         "upload_status": "uploaded",
-        "download_url": "временная приватная ссылка"
+        "download_url": "temporärer privater Link"
       }
     ]
   },
@@ -78,9 +78,9 @@ Production-сборка использует Webpack, потому что в и�
 }
 ```
 
-Временная ссылка на файл действует один час. Make должен скачать файл для классификации в течение этого времени. Сам Blob остается приватным.
+Der temporäre Dateilink ist eine Stunde lang gültig. Make muss die Datei innerhalb dieses Zeitraums zur Klassifizierung herunterladen. Der Blob bleibt privat.
 
-В конце сценария Make нужен модуль `Webhook response`, который возвращает один из согласованных вариантов:
+Am Ende des Make-Szenarios wird ein `Webhook response`-Modul benötigt, das eine der vereinbarten Antworten zurückgibt:
 
 ```json
 // HTTP 201
@@ -107,18 +107,18 @@ Production-сборка использует Webpack, потому что в и�
 }
 ```
 
-Для критической заявки сервер сам передает `request.requires_human_review: true` и не позволит ответу `201` изменить это значение обратно на `false`.
+Bei einer kritischen Anfrage setzt der Server selbst `request.requires_human_review: true` und verhindert, dass eine `201`-Antwort diesen Wert wieder auf `false` ändert.
 
-## Где находится логика
+## Wo sich die Logik befindet
 
-- [app/[[...slug]]/page.tsx](./app/[[...slug]]/page.tsx): маршрутизация страниц.
-- [components/pages.tsx](./components/pages.tsx): контент основных страниц.
-- [components/service-form.tsx](./components/service-form.tsx): форма, ошибки, загрузка файлов и обработка `201/400/409`.
-- [app/api/service-request/route.ts](./app/api/service-request/route.ts): проверка, Turnstile, временные Blob-ссылки и прокси к Make.
-- [app/api/upload/route.ts](./app/api/upload/route.ts): разрешения для прямой загрузки в Vercel Blob.
-- [lib/form-contract.ts](./lib/form-contract.ts): TypeScript-контракт и серверная валидация.
-- [app/globals.css](./app/globals.css): перенесенная дизайн-система и адаптивная верстка.
+- [app/[[...slug]]/page.tsx](./app/[[...slug]]/page.tsx): Seiten-Routing.
+- [components/pages.tsx](./components/pages.tsx): Inhalte der wichtigsten Seiten.
+- [components/service-form.tsx](./components/service-form.tsx): Formular, Fehler, Datei-Uploads und Verarbeitung von `201/400/409`.
+- [app/api/service-request/route.ts](./app/api/service-request/route.ts): Prüfung, Turnstile, temporäre Blob-Links und Proxy zu Make.
+- [app/api/upload/route.ts](./app/api/upload/route.ts): Berechtigungen für direkte Uploads in Vercel Blob.
+- [lib/form-contract.ts](./lib/form-contract.ts): TypeScript-Vertrag und serverseitige Validierung.
+- [app/globals.css](./app/globals.css): Übertragenes Designsystem und responsive Layouts.
 
-## Перед production
+## Vor dem Production-Einsatz
 
-Текущий лимит запросов хранится в памяти отдельной serverless-функции и подходит как дополнительный слой для небольшого демо. Для общего лимита между всеми инстансами подключите Vercel Firewall или внешнее хранилище лимитов. Также задайте срок хранения Blob-файлов и удаляйте их после классификации или завершения проверки согласно политике конфиденциальности.
+Das aktuelle Anfrage-Limit wird im Speicher einer separaten Serverless-Funktion gehalten und eignet sich als zusätzliche Schutzschicht für eine kleine Demo. Für ein gemeinsames Limit über alle Instanzen hinweg sollte Vercel Firewall oder ein externer Limit-Speicher verwendet werden. Legen Sie außerdem eine Aufbewahrungsfrist für Blob-Dateien fest und löschen Sie sie nach der Klassifizierung oder dem Abschluss der Prüfung entsprechend der Datenschutzrichtlinie.
