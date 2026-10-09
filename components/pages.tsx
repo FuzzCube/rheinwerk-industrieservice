@@ -197,20 +197,87 @@ type LegalKind = "impressum" | "datenschutz" | "cookies" | "kundenbedingungen";
 export function LegalPage({ kind }: { kind: LegalKind }) {
   const header = {
     impressum: ["Impressum", "Angaben gemäß § 5 DDG. Dieses Impressum gehört zu einem fiktiven Portfolio-Projekt."],
-    datenschutz: ["Datenschutz", "Welche Daten die Serviceanfrage erhebt, wozu wir sie verarbeiten und wie lange wir sie aufbewahren."],
+    datenschutz: ["Datenschutzerklärung", "Stand: 9. Oktober 2026"],
     cookies: ["Cookie-Richtlinie", "Diese Website setzt keine Analyse- und keine Marketing-Cookies. Was gespeichert wird, steht hier vollständig."],
     kundenbedingungen: ["Kundenbedingungen", "Dieses Dokument gehört nicht zum Umfang des Prototyps."],
   }[kind];
   return <Section tone="page" compact><Container><Breadcrumb items={[{ label: "Startseite", href: "/" }, { label: header[0] }]} /><PageHero eyebrow="Rechtliches" title={header[0]} body={header[1]} />
     {kind === "impressum" && <div className="card-grid card-grid--2 legal-content"><Panel><h2>Anbieter</h2><Specs items={[{ label: "Unternehmen", value: "RheinWerk Industrieservice GmbH" }, { label: "Anschrift", value: "Rheinwerkstraße 12, 68169 Mannheim", mono: true }, { label: "Geschäftsführung", value: "Dr. Lena Hartmann" }, { label: "Telefon", value: "+49 621 00000-0", mono: true }, { label: "E-Mail", value: "service@rheinwerk-industrieservice.example", mono: true }, { label: "Registereintrag", value: "Nicht vergeben, fiktives Portfolio-Projekt" }, { label: "USt-IdNr.", value: "Nicht vergeben, fiktives Portfolio-Projekt" }]} /></Panel><div><h2>Haftung und Inhalte</h2><p>Die Inhalte dieser Website beschreiben Leistungen, Preisrahmen und Servicezeiten eines fiktiven Unternehmens. Sie stellen kein Angebot dar und begründen keine Ansprüche.</p><p>Registereintrag, Umsatzsteuer-Identifikationsnummer und Aufsichtsbehörde sind nicht vergeben, da kein reales Unternehmen dahintersteht. In einer echten Veröffentlichung stehen an dieser Stelle Handelsregister, Registernummer und USt-IdNr.</p><h2>Verantwortlich für den Inhalt</h2><p>Dr. Lena Hartmann, Geschäftsführung, Anschrift wie oben.</p></div></div>}
-    {kind === "datenschutz" && <div className="legal-stack"><Alert lead="Platzhaltertext.">Dieser Text gehört zu einem fiktiven Portfolio-Projekt, ersetzt keine Rechtsberatung und ist keine vollständige Datenschutzerklärung.</Alert><LegalCopy /></div>}
+    {kind === "datenschutz" && <div className="legal-stack"><LegalCopy /></div>}
     {kind === "cookies" && <div className="card-grid card-grid--2 legal-content"><Panel><h2>Was gespeichert wird</h2><Specs items={[{ label: "Formulareingaben", value: "Sitzung im Browser, bis zum Senden", mono: true }, { label: "Analyse-Cookies", value: "Keine" }, { label: "Marketing-Cookies", value: "Keine" }, { label: "Kartenkacheln", value: "OpenStreetMap, nur auf der Kontaktseite" }]} /></Panel><div><h2>Technisch notwendige Speicherung</h2><p>Damit die Serviceanfrage über fünf Schritte funktioniert, hält die Website Ihre Eingaben in der laufenden Sitzung im Browser. Diese Daten verlassen den Browser erst, wenn Sie senden, und werden beim Schließen verworfen.</p><h2>Externe Inhalte</h2><p>Der Kartenausschnitt auf der Kontaktseite lädt Kacheln von OpenStreetMap. Dabei wird Ihre IP-Adresse an den Kachelserver übertragen. Ohne Aufruf der Kontaktseite findet diese Übertragung nicht statt.</p><h2>Keine Einwilligungspflicht</h2><p>Da keine Analyse-, Tracking- oder Marketing-Cookies gesetzt werden, gibt es kein Cookie-Banner. Mehr zur Verarbeitung Ihrer Daten steht im <Link href="/datenschutz">Datenschutz</Link>.</p></div></div>}
     {kind === "kundenbedingungen" && <div className="legal-stack"><Alert lead="Nicht angelegt.">Für dieses fiktive Portfolio-Projekt wurden keine Kundenbedingungen formuliert. Angelegt sind Impressum, Datenschutz und Cookie-Richtlinie.</Alert><div className="button-row"><ButtonLink href="/datenschutz" variant="secondary">Datenschutz</ButtonLink><ButtonLink href="/impressum" variant="secondary">Impressum</ButtonLink></div></div>}
   </Container></Section>;
 }
 
 function LegalCopy() {
-  return <div className="legal-copy"><h2>Verantwortlicher</h2><p>RheinWerk Industrieservice GmbH, Rheinwerkstraße 12, 68169 Mannheim, service@rheinwerk-industrieservice.example, +49 621 00000-0.</p><h2>Zwecke und Rechtsgrundlagen</h2><p>Wir verarbeiten die Angaben aus der Serviceanfrage, um die Anfrage zu prüfen, den Einsatz zu planen und mit Ihnen abzustimmen. Rechtsgrundlage ist Art. 6 Abs. 1 lit. b DSGVO für die Vertragsanbahnung sowie Art. 6 Abs. 1 lit. a DSGVO für die im Formular erteilte Zustimmung.</p><h2>Erhobene Daten</h2><p>Unternehmen, Name der Kontaktperson, geschäftliche E-Mail-Adresse, Telefonnummer, Standortadresse, Angaben zur Anlage, Beschreibung der Störung, Dringlichkeit, gewünschter Einsatztermin, Kunden- oder SLA-Vertragsnummer sowie hochgeladene Fotos und Dokumente.</p><h2>Empfänger</h2><p>Innerhalb des Unternehmens erhalten Service Desk und Einsatzplanung Zugriff, dazu die eingesetzten Servicetechniker. Eine Übermittlung an Dritte erfolgt nur, wenn sie zur Auftragsdurchführung erforderlich oder gesetzlich vorgeschrieben ist.</p><h2>Speicherdauer</h2><p>Anfragen, aus denen kein Auftrag entsteht, werden nach Abschluss der Prüfung gelöscht. Auftragsbezogene Unterlagen unterliegen den gesetzlichen Aufbewahrungsfristen.</p><h2>Ihre Rechte</h2><p>Sie haben das Recht auf Auskunft, Berichtigung, Löschung, Einschränkung der Verarbeitung, Datenübertragbarkeit und Widerspruch. Eine erteilte Zustimmung können Sie jederzeit widerrufen. Zudem können Sie sich bei der zuständigen Aufsichtsbehörde beschweren.</p><h2>Karte</h2><p>Der Kartenausschnitt auf der Kontaktseite lädt Kartenkacheln von OpenStreetMap. Dabei wird Ihre IP-Adresse an den Kachelserver übertragen. Details stehen in der <Link href="/cookie-richtlinie">Cookie-Richtlinie</Link>.</p></div>;
+  return (
+    <div className="legal-copy">
+      <h2>1. Verantwortlicher</h2>
+      <p>Verantwortlich für diese Website und die zugehörige RheinWerk-Demonstrationsanwendung ist:</p>
+      <p>Andrejs Sadkovojs<br />Pozistr. 3<br />68168 Mannheim<br />Deutschland</p>
+      <p>E-Mail: andrejs.sadkovojs@gmail.com</p>
+      <p>RheinWerk ist ein Portfolio-Projekt zur Demonstration einer Website und automatisierter Arbeitsabläufe. Die dargestellte „RheinWerk Industrieservice GmbH“ ist ein fiktives Unternehmen. Über dieses Projekt werden keine tatsächlichen Industrieservice-Aufträge angenommen.</p>
+      <p>Die folgenden Hinweise betreffen die tatsächliche technische Datenverarbeitung im Projekt.</p>
+      <h2>2. Bereitstellung der Website</h2>
+      <p>Die Website wird über Vercel bereitgestellt. Beim Besuch können technische Daten verarbeitet werden, insbesondere IP-Adresse, aufgerufene Seiten, Zeitpunkt des Zugriffs, Browser- und Geräteinformationen sowie Fehler- und Sicherheitsinformationen.</p>
+      <p>Die Verarbeitung dient der Bereitstellung und dem sicheren Betrieb der Website. Rechtsgrundlage ist Art. 6 Abs. 1 lit. f DSGVO. Das berechtigte Interesse besteht in der zuverlässigen Präsentation und technischen Absicherung des Portfolio-Projekts.</p>
+      <p>Weitere Informationen: <a href="https://vercel.com/legal/privacy-notice">Datenschutzhinweise von Vercel</a>.</p>
+      <h2>3. Demonstrationsformular und Datei-Uploads</h2>
+      <p>Das Anfrageformular dient der Demonstration eines digitalen Serviceprozesses. Bitte verwenden Sie ausschließlich erfundene Angaben und geeignete Testdateien. Übermitteln Sie keine vertraulichen Geschäftsdaten, Zugangsdaten oder personenbezogenen Informationen anderer Personen.</p>
+      <p>Das Formular kann Kontaktangaben, Standortinformationen, technische Anlagendaten, Beschreibungen und Anhänge erfassen. Werden echte personenbezogene Daten eingegeben, können diese technisch genauso verarbeitet werden wie Testdaten.</p>
+      <p>Ausgewählte Dateien können bereits vor dem endgültigen Absenden des Formulars zu Vercel Blob hochgeladen werden. Das Schließen des Formulars löscht bereits hochgeladene Dateien nicht automatisch.</p>
+      <p>Für die weitere Verarbeitung sind Automatisierungsabläufe mit n8n sowie eine Datenbank und ein Dateispeicher auf Basis von Supabase vorgesehen. Dort können übermittelte Angaben, Dateien und Bearbeitungsstände gespeichert werden.</p>
+      <p>[Vor Veröffentlichung ergänzen: tatsächlicher Betriebsort und Hosting-Anbieter der Automatisierung sowie bestätigen, ob Make.com weiterhin Formularangaben verarbeitet. Falls ja, dessen Funktion und Empfängerinformationen ergänzen.]</p>
+      <p>Zweck ist die Demonstration und Prüfung der technischen Abläufe. Soweit dabei personenbezogene Daten verarbeitet werden, erfolgt dies auf Grundlage einer wirksamen Einwilligung oder eines einschlägigen berechtigten Interesses nach Art. 6 Abs. 1 lit. a beziehungsweise lit. f DSGVO. Eine Einwilligung muss vor der betreffenden Verarbeitung eingeholt werden.</p>
+      <h2>4. Kontaktaufnahme</h2>
+      <p>Bei einer Kontaktaufnahme mit dem Projektbetreiber werden Ihre E-Mail-Adresse und die mitgeteilten Inhalte zur Bearbeitung Ihres Anliegens verwendet.</p>
+      <p>Rechtsgrundlage ist Art. 6 Abs. 1 lit. f DSGVO. Das berechtigte Interesse besteht in der Beantwortung von Fragen und Rückmeldungen zum Projekt. Soweit Ihre Anfrage auf einen Vertrag mit dem Projektbetreiber gerichtet ist, gilt Art. 6 Abs. 1 lit. b DSGVO.</p>
+      <h2>5. Gmail-Anbindung</h2>
+      <p>Die Gmail-Anbindung ist für die vom Projektbetreiber autorisierten Demonstrations- und Testabläufe vorgesehen. Besucher der Website müssen dafür kein Google-Konto verbinden.</p>
+      <p>Die Verbindung erfolgt über Google OAuth. Abhängig von den erteilten Berechtigungen können Kontoinformationen, E-Mail-Adressen, Absender und Empfänger, Betreffzeilen, Nachrichtentexte, Zeitstempel, Nachrichtenkennungen und Anhänge verarbeitet werden.</p>
+      <p>Die Funktionen umfassen das Zuordnen von Testnachrichten zu Demonstrationsanfragen, das Speichern zugehöriger Anhänge und den Versand freigegebener Testantworten. Für diese Abläufe sollen ausschließlich geeignete Testnachrichten verwendet werden.</p>
+      <p>Die Anwendung erhält kein Google-Passwort. Für den Zugriff werden OAuth-Zugriffstokens und gegebenenfalls Erneuerungstokens verarbeitet. Die tatsächlich angeforderten Berechtigungen werden bei der Google-Autorisierung angezeigt.</p>
+      <p>Die Autorisierung eines Kontos ersetzt keine Rechtsgrundlage für die Verarbeitung personenbezogener Daten anderer Personen, die in dessen Nachrichten enthalten sind.</p>
+      <h2>6. Geplante KI-Funktionen mit OpenAI</h2>
+      <p>Für die Demonstration sind KI-Funktionen über die OpenAI API vorgesehen. Dazu gehören das Zusammenfassen und Einordnen von Anfragen, das Herausarbeiten technischer Angaben aus Testdokumenten oder Bildern und die Unterstützung bei Antwortentwürfen.</p>
+      <p>Solange diese Funktionen nicht aktiviert sind, werden durch sie keine Inhalte an OpenAI übertragen.</p>
+      <p>Bei aktivierten Funktionen können die für die jeweilige Auswertung erforderlichen Texte, Bilder oder Dokumentinhalte an OpenAI übermittelt werden. Bitte verwenden Sie dafür erfundene Angaben und Testmaterial ohne vertrauliche oder personenbezogene Inhalte.</p>
+      <p>Falls personenbezogene Daten verarbeitet werden sollen, sind die betroffenen Personen zuvor über Zweck, Umfang und Empfänger zu informieren. Erforderliche Einwilligungen müssen vor der Verarbeitung vorliegen. Die Gmail-Autorisierung allein gilt nicht als gesonderte Zustimmung zur Übermittlung an OpenAI.</p>
+      <p>Nach den Bedingungen von OpenAI werden API-Eingaben und -Ausgaben standardmäßig nicht zum Training der Modelle verwendet. Sicherheits- und Missbrauchsprotokolle können jedoch Inhalte enthalten und grundsätzlich bis zu 30 Tage gespeichert werden; Ausnahmen sind möglich. Je nach verwendeter API-Funktion können zusätzliche Speicherfristen gelten.</p>
+      <p>Weitere Informationen: <a href="https://developers.openai.com/api/docs/guides/your-data">Datenverarbeitung bei OpenAI</a>.</p>
+      <p>KI-Ergebnisse können fehlerhaft sein. Sie dienen der Demonstration und Unterstützung. Entscheidungen mit rechtlicher oder ähnlich erheblicher Wirkung gegenüber Personen sind nicht vorgesehen.</p>
+      <h2>7. Beschränkte Nutzung von Google-Daten</h2>
+      <p>Die Nutzung und Weitergabe von Informationen aus Google APIs erfolgt entsprechend der <a href="https://developers.google.com/terms/api-services-user-data-policy">Google API Services User Data Policy</a>, einschließlich der Anforderungen zur beschränkten Nutzung („Limited Use“), und der <a href="https://developers.google.com/workspace/workspace-api-user-data-developer-policy">Google Workspace User Data and Developer Policy</a>.</p>
+      <p>Google-Daten werden ausschließlich für die offengelegten Funktionen verwendet. Sie werden nicht verkauft, für Werbung oder Werbeprofile genutzt oder zum Training allgemeiner KI-Modelle weitergegeben.</p>
+      <p>Eine Übermittlung an OpenAI ist auf die ausdrücklich offengelegte und autorisierte KI-Funktion beschränkt. Menschlicher Zugriff erfolgt nur im Rahmen zulässiger, autorisierter Funktionen oder der von Google vorgesehenen Ausnahmen.</p>
+      <h2>8. Cloudflare und Browser-Speicherung</h2>
+      <p>Cloudflare wird zur Erreichbarkeit und Absicherung der Automatisierungsdienste eingesetzt. Der Verwaltungsbereich wird zusätzlich durch eine Zugangskontrolle geschützt.</p>
+      <p>Das Formular verwendet Cloudflare Turnstile zur Erkennung automatisierter oder missbräuchlicher Zugriffe. Dabei können IP-Adressen sowie Browser-, Geräte- und technische Prüfinformationen verarbeitet werden. Rechtsgrundlage ist Art. 6 Abs. 1 lit. f DSGVO. Zweck und berechtigtes Interesse sind der Schutz vor Missbrauch.</p>
+      <p>Weitere Informationen: <a href="https://www.cloudflare.com/privacypolicy/">Cloudflare-Datenschutzhinweise</a> und <a href="https://www.cloudflare.com/turnstile-privacy-policy/">Turnstile-Datenschutzhinweise</a>.</p>
+      <p>Formulareingaben und eine technische Übermittlungskennung können vorübergehend im Sitzungsspeicher Ihres Browsers („sessionStorage“) gespeichert werden. Dies ermöglicht die Fortsetzung der Formularbearbeitung. Bereits an Server übermittelte Daten werden durch das Löschen dieses Browserspeichers nicht entfernt.</p>
+      <h2>9. Karten und Website-Assistent</h2>
+      <p>Beim Laden einer eingebundenen OpenStreetMap-Karte können Ihre IP-Adresse und technische Abrufinformationen an den Kartenanbieter übermittelt werden.</p>
+      <p>[Vor Veröffentlichung ergänzen: tatsächlicher Kartenanbieter, Datenschutzhinweise und Rechtsgrundlage.]</p>
+      <p>Bei Nutzung des Website-Assistenten wird Ihre Frage an dessen Backend übermittelt und zur Erstellung einer Antwort verarbeitet. Bitte verwenden Sie auch dort ausschließlich geeignete Testinhalte.</p>
+      <p>[Vor Veröffentlichung ergänzen: Hosting-Anbieter, tatsächlich eingesetzter KI-Anbieter, übermittelte Daten und Speicherfristen dieses separaten Assistenten.]</p>
+      <h2>10. Empfänger und internationale Verarbeitung</h2>
+      <p>Je nach verwendeter Funktion können Daten vom Projektbetreiber sowie von Vercel, Cloudflare, Google, OpenAI und den oben genannten weiteren technischen Dienstleistern verarbeitet werden.</p>
+      <p>Bei internationalen Anbietern kann eine Verarbeitung außerhalb der EU oder des Europäischen Wirtschaftsraums stattfinden.</p>
+      <p>[Vor Veröffentlichung ergänzen: die tatsächlich geltenden Übermittlungsgrundlagen für die eingesetzten Anbieter und Konten sowie eine Kontaktmöglichkeit für weitere Informationen dazu.]</p>
+      <h2>11. Speicherdauer und Löschung</h2>
+      <p>Personenbezogene Daten werden nur so lange aufbewahrt, wie dies für den jeweiligen Zweck erforderlich ist oder gesetzliche Aufbewahrungspflichten bestehen.</p>
+      <p>[Vor Veröffentlichung festlegen: Speicherfristen und Löschverfahren für Testübermittlungen, hochgeladene Dateien, E-Mail-Kopien, Ausführungsprotokolle und Sicherungskopien.]</p>
+      <p>Wenn Sie versehentlich echte personenbezogene Daten übermittelt haben, können Sie die Löschung unter andrejs.sadkovojs@gmail.com anfragen.</p>
+      <p>Eine Gmail-Verbindung kann jederzeit im betreffenden Google-Konto widerrufen werden. Bereits in der Anwendung gespeicherte Kopien werden dadurch nicht automatisch gelöscht. Deren Löschung kann beim Projektbetreiber angefragt werden. Eine Löschung aus der Anwendung löscht keine Nachrichten aus dem Gmail-Konto.</p>
+      <h2>12. Ihre Rechte</h2>
+      <p>Unter den gesetzlichen Voraussetzungen haben Sie Rechte auf Auskunft, Berichtigung, Löschung, Einschränkung der Verarbeitung und Datenübertragbarkeit.</p>
+      <p>Bei einer Verarbeitung auf Grundlage berechtigter Interessen können Sie aus Gründen Ihrer besonderen Situation widersprechen. Einwilligungen können Sie jederzeit mit Wirkung für die Zukunft widerrufen.</p>
+      <p>Sie können sich außerdem bei einer Datenschutzaufsichtsbehörde beschweren, insbesondere an Ihrem gewöhnlichen Aufenthaltsort, Arbeitsplatz oder dem Ort des vermuteten Verstoßes.</p>
+      <p>Zur Ausübung Ihrer Rechte wenden Sie sich an andrejs.sadkovojs@gmail.com.</p>
+      <h2>13. Änderungen</h2>
+      <p>Diese Datenschutzerklärung wird angepasst, wenn sich Funktionen, Dienstleister oder Datenverarbeitungen ändern. Erforderliche zusätzliche Einwilligungen werden vor Beginn der betreffenden Verarbeitung eingeholt.</p>
+    </div>
+  );
 }
 
 export function NotFoundPage() {
